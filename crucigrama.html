@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Crucigrama — Aprende Jugando</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #90caf9, #e1bee7);
+  margin: 0;
+  padding: 0;
+}
+.mini-hero {
+  background: #3949ab;
+  color: #fff;
+  padding: 15px;
+  text-align: center;
+}
+.back {
+  color: #272626ed;
+  text-decoration: none;
+  position: absolute;
+  left: 15px;
+  top: 15px;
+}
+.container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.panel {
+  background: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 700px;
+}
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.cru-board {
+  display: grid;
+  grid-template-columns: repeat(10, 35px);
+  grid-gap: 3px;
+  justify-content: center;
+  margin: 15px auto;
+}
+.cell {
+  width: 35px;
+  height: 35px;
+  text-transform: uppercase;
+  border: 1px solid #555;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+.cell.block {
+  background: #3949ab;
+}
+.clues {
+  margin-top: 10px;
+}
+.hint {
+  background: #e9e3fdf3;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+.controls {
+  text-align: center;
+  margin-top: 10px;
+}
+.small-btn {
+  background: #5c6bc0;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  margin: 5px;
+  cursor: pointer;
+}
+.small-btn:hover {
+  background: #283593;
+}
+.correct {
+  background-color: #c8e6c9 !important;
+}
+</style>
+</head>
+<body>
+<header class="mini-hero">
+<a class="back" href="index.html">⬅ Volver</a>
+<h1>Crucigrama</h1>
+<p>Completa las palabras según las pistas.</p>
+</header>
+
+<main class="container">
+<section class="panel">
+<div class="top-row">
+<div>Puntos: <span id="scoreCrucigrama">0</span></div>
+<div>Modo: 
+  <select id="cruMode">
+    <option value="normal">Normal</option>
+    <option value="timed">Cronometrado</option>
+  </select>
+</div>
+<div>Tiempo: <span id="cruTimer">--:--</span></div>
+</div>
+
+<div style="text-align:center; margin-bottom:10px;">
+  <label>Materia:</label>
+  <select id="materiaSelect">
+    <option value="lenguaje">Lenguaje</option>
+    <option value="ingles">Inglés</option>
+    <option value="sociales">C. Sociales</option>
+    <option value="naturales">C. Naturales</option>
+  </select>
+  <button id="loadCru" class="small-btn">Cargar Crucigrama</button>
+</div>
+
+<div id="cruBoard" class="cru-board"></div>
+<div id="cruClues" class="clues"></div>
+
+<div class="controls">
+<button id="checkCru" class="small-btn">Comprobar</button>
+<button id="saveScoreC" class="small-btn">Guardar puntuación</button>
+</div>
+</section>
+</main>
+
+<script>
+const crucigramas = {
+  lenguaje: {
+    palabras: [
+      { palabra: "VERBO", pista: "Palabra que indica acción." },
+      { palabra: "SUSTANTIVO", pista: "Nombra personas, animales o cosas." },
+      { palabra: "ADJETIVO", pista: "Describe cómo es algo." }
+    ]
+  },
+  ingles: {
+    palabras: [
+      { palabra: "APPLE", pista: "Manzana en inglés." },
+      { palabra: "BOOK", pista: "Libro en inglés." },
+      { palabra: "DOG", pista: "Perro en inglés." }
+    ]
+  },
+  sociales: {
+    palabras: [
+      { palabra: "BOLIVIA", pista: "Nuestro país." },
+      { palabra: "MAPA", pista: "Representación de un territorio." },
+      { palabra: "HISTORIA", pista: "Estudia los hechos del pasado." }
+    ]
+  },
+  naturales: {
+    palabras: [
+      { palabra: "AGUA", pista: "Líquido esencial para la vida." },
+      { palabra: "SOL", pista: "Estrella que ilumina la Tierra." },
+      { palabra: "PLANTA", pista: "Ser vivo que realiza fotosíntesis." }
+    ]
+  }
+};
+
+function crearGrilla(size = 10) {
+  const contenedor = document.getElementById("cruBoard");
+  contenedor.innerHTML = "";
+  contenedor.style.gridTemplateColumns = `repeat(${size}, 35px)`;
+  for (let i = 0; i < size * size; i++) {
+    const cell = document.createElement("input");
+    cell.maxLength = 1;
+    cell.className = "cell";
+    contenedor.appendChild(cell);
+  }
+}
+
+function cargarCrucigrama() {
+  crearGrilla();
+  const materia = document.getElementById("materiaSelect").value;
+  const data = crucigramas[materia].palabras;
+  const clues = document.getElementById("cruClues");
+  clues.innerHTML = "";
+  data.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.className = "hint";
+    div.textContent = `${i + 1}. ${item.pista}`;
+    clues.appendChild(div);
+  });
+  alert("Crucigrama cargado: " + materia.toUpperCase() + " 🧩");
+}
+
+document.getElementById("loadCru").addEventListener("click", cargarCrucigrama);
+
+document.getElementById("checkCru").addEventListener("click", () => {
+  const materia = document.getElementById("materiaSelect").value;
+  const palabras = crucigramas[materia].palabras;
+  let aciertos = 0;
+  palabras.forEach(p => {
+    const letras = Array.from(document.querySelectorAll(".cell")).map(c => c.value).join("");
+    if (letras.includes(p.palabra)) aciertos++;
+  });
+  document.getElementById("scoreCrucigrama").textContent = aciertos * 10;
+  alert("Aciertos: " + aciertos + " / " + palabras.length);
+});
+
+document.addEventListener("input", (e) => {
+  if (e.target.classList.contains("cell")) {
+    e.target.value = e.target.value.toUpperCase();
+  }
+});
+</script>
+
+<script src="js/main.js" defer></script>
+<script src="js/crucigrama.js" defer></script>
+</body>
+</html>

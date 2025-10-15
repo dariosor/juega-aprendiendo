@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Adivinar Palabras — Aprende Jugando</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f2f5ff;
+      margin: 0;
+      text-align: center;
+    }
+    header {
+      background: #4a6cf7;
+      color: #fff;
+      padding: 1rem;
+      border-radius: 0 0 20px 20px;
+    }
+    header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1rem;
+      float: left;
+    }
+    main {
+      padding: 20px;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .hint-box {
+      background: #eaf0ff;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      margin: 10px 0;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #ccc;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    button {
+      background: #4a6cf7;
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 5px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #3452c3;
+    }
+    #message {
+      font-size: 1.2rem;
+      margin-top: 10px;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+<header class="mini-hero">
+  <a class="back" href="index.html">⬅ Volver</a>
+  <h1>Adivinar Palabras</h1>
+  <p>Adivina la palabra con pista o definición.</p>
+</header>
+
+<main class="container">
+  <section class="panel">
+    <div class="top-row">
+      <div>Ronda: <span id="round">1</span></div>
+      <div>Tiempo: <span id="advTimer">--:--</span></div>
+      <div>Puntos: <span id="scoreAdv">0</span></div>
+    </div>
+
+    <label for="subjectSelect"><b>Selecciona la materia:</b></label><br>
+    <select id="subjectSelect">
+      <option value="lenguaje">Lenguaje</option>
+      <option value="ingles">Inglés</option>
+      <option value="sociales">C. Sociales</option>
+      <option value="naturales">C. Naturales</option>
+    </select>
+
+    <div id="hint" class="hint-box">Selecciona una materia y presiona "Siguiente".</div>
+    <input id="guessInput" placeholder="Escribe la palabra aquí" autocomplete="off">
+
+    <div class="controls">
+      <button id="submitGuess">Comprobar</button>
+      <button id="nextRound">Siguiente</button>
+      <button id="saveScoreAdv">Guardar puntuación</button>
+    </div>
+
+    <div id="message"></div>
+  </section>
+</main>
+
+<script>
+  const riddles = {
+    lenguaje: [
+      { hint: "Palabra que indica una acción.", answer: "verbo" },
+      { hint: "Signo que se usa al final de una oración.", answer: "punto" },
+      { hint: "Conjunto de letras que forman palabras.", answer: "alfabeto" }
+    ],
+    ingles: [
+      { hint: "Color del cielo en inglés.", answer: "blue" },
+      { hint: "Animal que dice 'woof'.", answer: "dog" },
+      { hint: "Forma plural de 'child'.", answer: "children" }
+    ],
+    sociales: [
+      { hint: "Lugar donde viven las personas.", answer: "ciudad" },
+      { hint: "Persona que enseña en la escuela.", answer: "maestro" },
+      { hint: "País donde vivimos.", answer: "bolivia" }
+    ],
+    naturales: [
+      { hint: "Astro que da luz y calor.", answer: "sol" },
+      { hint: "Líquido esencial para la vida.", answer: "agua" },
+      { hint: "Animal que produce miel.", answer: "abeja" }
+    ]
+  };
+
+  let round = 1;
+  let score = 0;
+  let current = null;
+  let selectedSubject = "lenguaje";
+  const hintEl = document.getElementById("hint");
+  const guessEl = document.getElementById("guessInput");
+  const msgEl = document.getElementById("message");
+
+  document.getElementById("subjectSelect").addEventListener("change", (e) => {
+    selectedSubject = e.target.value;
+    msgEl.textContent = "";
+    hintEl.textContent = "Materia cambiada. Pulsa 'Siguiente' para continuar.";
+  });
+
+  document.getElementById("nextRound").addEventListener("click", () => {
+    const set = riddles[selectedSubject];
+    current = set[Math.floor(Math.random() * set.length)];
+    hintEl.textContent = current.hint;
+    guessEl.value = "";
+    msgEl.textContent = "";
+    document.getElementById("round").textContent = round;
+  });
+
+  document.getElementById("submitGuess").addEventListener("click", () => {
+    if (!current) {
+      msgEl.textContent = "Primero pulsa 'Siguiente' para obtener una adivinanza.";
+      return;
+    }
+    const guess = guessEl.value.trim().toLowerCase();
+    if (guess === current.answer) {
+      score += 10;
+      msgEl.textContent = "✅ ¡Correcto!";
+      round++;
+    } else {
+      msgEl.textContent = "❌ Incorrecto. La respuesta era: " + current.answer;
+    }
+    document.getElementById("scoreAdv").textContent = score;
+  });
+
+  document.getElementById("saveScoreAdv").addEventListener("click", () => {
+    alert("Puntuación guardada: " + score + " puntos 🎯");
+  });
+</script>
+
+</body>
+</html>

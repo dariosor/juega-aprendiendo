@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sopa de Letras - Aprende Jugando</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #81d4fa, #ce93d8);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      min-height: 100vh;
+    }
+    header {
+      background: #3949ab;
+      color: white;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .nav-btn {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    main { margin-top: 20px; }
+    #panel-sopa {
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+    select, button {
+      padding: 8px 12px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #5c6bc0;
+      color: rgba(201, 239, 31, 0.811);
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #sopa {
+      display: grid;
+      grid-template-columns: repeat(10, 35px);
+      grid-gap: 3px;
+      justify-content: center;
+      margin: 20px auto;
+      user-select: none;
+    }
+    .cell {
+      width: 35px;
+      height: 35px;
+      background: white;
+      border: 1px solid #555;
+      font-weight: bold;
+      font-size: 18px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .cell.selected { background-color: #c5cae9; }
+    .cell.found { background-color: #81c784; color: white; }
+    #lista-palabras {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      list-style: none;
+      padding: 0;
+    }
+    #lista-palabras li {
+      background: #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #lista-palabras li.found {
+      background: #66bb6a;
+      color: white;
+      text-decoration: line-through;
+    }
+    footer {
+      margin-top: 30px;
+      padding: 10px;
+      background: #3949ab;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎯 Sopa de Letras</h1>
+    <nav>
+      <a href="index.html" class="nav-btn">⬅ Volver al inicio</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="panel-sopa">
+      <h2>Selecciona la materia y encuentra las palabras:</h2>
+
+      <label>Materia:</label>
+      <select id="materiaSelect">
+        <option value="lenguaje">Lenguaje</option>
+        <option value="ingles">Inglés</option>
+        <option value="sociales">C. Sociales</option>
+        <option value="naturales">C. Naturales</option>
+      </select>
+      <button onclick="cargarSopa()">Cargar Sopa</button>
+
+      <ul id="lista-palabras"></ul>
+      <div id="sopa"></div>
+      <div id="resultado"></div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Aprende Jugando
+  </footer>
+
+  <script>
+    const sopas = {
+      lenguaje: ["VERBO", "LETRA", "PALABRA", "LECTURA", "CUENTO"],
+      ingles: ["APPLE", "DOG", "BOOK", "CAT", "SUN"],
+      sociales: ["MAPA", "BOLIVIA", "BANDERA", "CIUDAD", "HISTORIA"],
+      naturales: ["SOL", "AGUA", "PLANTA", "ANIMAL", "AIRE"]
+    };
+
+    let gridSize = 10;
+    let startCell = null;
+    let endCell = null;
+    let matriz = [];
+    let palabras = [];
+    let palabrasEncontradas = [];
+
+    function crearMatriz(size) {
+      const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      let matriz = [];
+      for (let i = 0; i < size; i++) {
+        matriz[i] = [];
+        for (let j = 0; j < size; j++) {
+          matriz[i][j] = letras.charAt(Math.floor(Math.random() * letras.length));
+        }
+      }
+      return matriz;
+    }
+
+    function colocarPalabras(matriz, palabras) {
+      palabras.forEach(palabra => {
+        palabra = palabra.toUpperCase();
+        let colocada = false;
+        while (!colocada) {
+          let horizontal = Math.random() > 0.5;
+          let fila = Math.floor(Math.random() * gridSize);
+          let col = Math.floor(Math.random() * gridSize);
+          if (horizontal && col + palabra.length <= gridSize) {
+            for (let i = 0; i < palabra.length; i++) matriz[fila][col + i] = palabra[i];
+            colocada = true;
+          } else if (!horizontal && fila + palabra.length <= gridSize) {
+            for (let i = 0; i < palabra.length; i++) matriz[fila + i][col] = palabra[i];
+            colocada = true;
+          }
+        }
+      });
+      return matriz;
+    }
+
+    function mostrarSopa() {
+      const grid = document.getElementById("sopa");
+      const lista = document.getElementById("lista-palabras");
+      grid.innerHTML = "";
+      lista.innerHTML = "";
+      palabrasEncontradas = [];
+
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.textContent = matriz[i][j];
+          cell.dataset.row = i;
+          cell.dataset.col = j;
+          cell.addEventListener("mousedown", () => startCell = cell);
+          cell.addEventListener("mouseup", () => seleccionarPalabra(cell));
+          grid.appendChild(cell);
+        }
+      }
+
+      palabras.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = p;
+        lista.appendChild(li);
+      });
+    }
+
+    function cargarSopa() {
+      const materia = document.getElementById("materiaSelect").value;
+      palabras = sopas[materia];
+      matriz = crearMatriz(gridSize);
+      matriz = colocarPalabras(matriz, palabras);
+      mostrarSopa();
+      document.getElementById("resultado").innerHTML = "";
+    }
+
+    function seleccionarPalabra(cell) {
+      if (!startCell) return;
+      endCell = cell;
+
+      let r1 = parseInt(startCell.dataset.row);
+      let c1 = parseInt(startCell.dataset.col);
+      let r2 = parseInt(endCell.dataset.row);
+      let c2 = parseInt(endCell.dataset.col);
+
+      let palabra = "";
+
+      // Horizontal
+      if (r1 === r2) {
+        const start = Math.min(c1, c2);
+        const end = Math.max(c1, c2);
+        for (let j = start; j <= end; j++) {
+          palabra += matriz[r1][j];
+        }
+      }
+      // Vertical
+      else if (c1 === c2) {
+        const start = Math.min(r1, r2);
+        const end = Math.max(r1, r2);
+        for (let i = start; i <= end; i++) {
+          palabra += matriz[i][c1];
+        }
+      }
+
+      verificarPalabra(palabra);
+      startCell = null;
+      endCell = null;
+    }
+
+    function verificarPalabra(palabra) {
+      palabra = palabra.toUpperCase();
+      const palabraInvertida = palabra.split("").reverse().join("");
+      if (palabras.includes(palabra) && !palabrasEncontradas.includes(palabra)) {
+        marcarEncontrada(palabra);
+      } else if (palabras.includes(palabraInvertida) && !palabrasEncontradas.includes(palabraInvertida)) {
+        marcarEncontrada(palabraInvertida);
+      }
+    }
+
+    function marcarEncontrada(palabra) {
+      palabrasEncontradas.push(palabra);
+      document.querySelectorAll("#lista-palabras li").forEach(li => {
+        if (li.textContent === palabra) li.classList.add("found");
+      });
+
+      if (palabrasEncontradas.length === palabras.length) {
+        document.getElementById("resultado").innerHTML = "🎉 ¡Felicidades! Encontraste todas las palabras.";
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aprende Jugando</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="hero">
+  <!-- 🔹 LOGO agregado arriba a la izquierda -->
+  <img src="logoes.png" alt="Logo Aprende Jugando" class="logo">
+
+  <div class="hero-inner">
+    <h1>Aprende Jugando</h1>
+    <p class="subtitle">Lenguaje · Inglés · Ciencias Sociales · Ciencias Naturales — nivel primario</p>
+    <div class="cta-row">
+      <a class="big-btn" href="ahorcados.html">Ahorcados</a>
+      <a class="big-btn" href="sopa.html">Sopa de Letras</a>
+      <a class="big-btn" href="crucigrama.html">Crucigrama</a>
+      <a class="big-btn" href="adivinar.html">Adivinar Palabras</a>
+    </div>
+    <p class="mini">Cada acierto suma puntos. ¡Prueba el modo cronometrado para más presión!</p>
+    <div class="score-panel">
+      <div>Puntaje actual: <strong id="globalScore">0</strong></div>
+      <button id="resetBtn" class="small-btn">Reiniciar puntaje</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="panel">
+    <h2>Tabla de puntuación (Top 10)</h2>
+    <div id="leaderboard"></div>
+    <p class="hint">Al finalizar cada partida podrás guardar tu puntuación con tu nombre.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Instrucciones rápidas</h2>
+    <ul>
+      <li><strong>Ahorcados:</strong> encuentra la palabra, evita fallos y gana puntos por letras y por completar la palabra.</li>
+      <li><strong>Sopa de Letras:</strong> encuentra palabras seleccionando letras (clic o arrastrando). Hay modo normal y cronometrado.</li>
+      <li><strong>Crucigrama:</strong> completa las palabras según las pistas y presiona "Comprobar".</li>
+      <li><strong>Adivinar palabras:</strong> adivina la palabra con pista o anagrama. El tiempo cuenta.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+&copy;
+</footer>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

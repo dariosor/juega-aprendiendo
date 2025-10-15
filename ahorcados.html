@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ahorcados — Aprende Jugando</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#38bdf8;--muted:#94a3b8;--success:#22c55e;--danger:#ef4444}
+    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#020617 0%,#041233 100%);color:#e6eef8;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0}
+    header.mini-hero{background:rgba(255,255,255,0.05);padding:16px;width:100%;text-align:center;position:sticky;top:0;z-index:10;backdrop-filter:blur(6px)}
+    header.mini-hero h1{margin:4px 0;font-size:24px}
+    header.mini-hero p{margin:0;font-size:14px;color:var(--muted)}
+    a.back{color:var(--accent);text-decoration:none;font-size:14px;position:absolute;left:16px;top:16px}
+    .container{width:100%;max-width:980px;background:rgba(255,255,255,0.02);border-radius:12px;padding:18px;margin-top:20px;box-shadow:0 8px 30px rgba(3,7,18,0.6)}
+    .panel{display:flex;flex-direction:column;align-items:center;gap:16px}
+    .top-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;width:100%;gap:10px;font-size:15px;color:var(--muted)}
+    select{background:var(--card);border:1px solid rgba(255,255,255,0.08);color:white;border-radius:6px;padding:4px 8px}
+    .word-display{font-size:34px;letter-spacing:6px;text-align:center;margin:18px 0}
+    .letters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+    .letter-btn{width:40px;height:40px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#e8f6ff;cursor:pointer;font-weight:600}
+    .letter-btn:disabled{opacity:0.35;cursor:not-allowed}
+    .controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
+    .small-btn{background:var(--accent);border:none;border-radius:8px;padding:8px 12px;color:#052231;cursor:pointer;font-size:13px}
+    .subjects{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--muted)}
+    .btn.active{border-color:var(--accent);color:var(--accent);box-shadow:0 6px 18px rgba(56,189,248,0.08)}
+    .hangman svg{width:200px;height:200px;margin-top:10px}
+    .hint{color:var(--muted);font-size:14px;margin-top:8px;text-align:center}
+    .message{padding:10px;border-radius:8px;margin-top:10px;text-align:center}
+    .message.win{background:rgba(34,197,94,0.12);color:var(--success)}
+    .message.lose{background:rgba(239,68,68,0.12);color:var(--danger)}
+  </style>
+</head>
+<body>
+<header class="mini-hero">
+  <a class="back" href="index.html">⬅ Volver</a>
+  <h1>Ahorcados</h1>
+  <p>Encuentra la palabra antes de que se complete el dibujo.</p>
+</header>
+
+<main class="container">
+  <section class="panel">
+    <div class="top-row">
+      <div>Modo: <select id="modeSelect"><option value="normal">Normal</option><option value="timed">Cronometrado</option></select></div>
+      <div>Tiempo: <span id="timerDisplay">--:--</span></div>
+      <div>Puntos: <span id="scoreAhorcado">0</span></div>
+    </div>
+
+    <div class="subjects">
+      <button class="btn active" data-subject="lenguaje">Lenguaje</button>
+      <button class="btn" data-subject="ingles">Inglés</button>
+      <button class="btn" data-subject="c.sociales">C. Sociales</button>
+      <button class="btn" data-subject="c.naturales">C. Naturales</button>
+    </div>
+
+    <div id="wordDisplay" class="word-display">_ _ _ _ _</div>
+    <div id="hangmanDrawing" class="hangman">
+      <svg viewBox="0 0 120 140">
+        <line x1="10" y1="130" x2="110" y2="130" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+        <line x1="30" y1="130" x2="30" y2="10" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+        <line x1="30" y1="10" x2="80" y2="10" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+        <line x1="80" y1="10" x2="80" y2="25" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+        <circle id="part-head" cx="80" cy="32" r="7" stroke="rgba(255,255,255,0.8)" stroke-width="1.6" fill="transparent" opacity="0"/>
+        <line id="part-body" x1="80" y1="39" x2="80" y2="70" stroke="rgba(255,255,255,0.8)" stroke-width="1.6" opacity="0"/>
+        <line id="part-arm-l" x1="80" y1="48" x2="68" y2="60" stroke="rgba(255,255,255,0.8)" stroke-width="1.6" opacity="0"/>
+        <line id="part-arm-r" x1="80" y1="48" x2="92" y2="60" stroke="rgba(255,255,255,0.8)" stroke-width="1.6" opacity="0"/>
+        <line id="part-leg-l" x1="80" y1="70" x2="70" y2="92" stroke="rgba(255,255,255,0.8)" stroke-width="1.6" opacity="0"/>
+        <line id="part-leg-r" x1="80" y1="70" x2="90" y2="92" stroke="rgba(255,255,255,0.8)" stroke-width="1.6" opacity="0"/>
+      </svg>
+    </div>
+
+    <div id="letters" class="letters"></div>
+
+    <div class="controls">
+      <button id="newWordBtn" class="small-btn">Nueva palabra</button>
+      <button id="saveScoreA" class="small-btn">Guardar puntuación</button>
+    </div>
+    <div class="hint" id="wordHint">Pista: —</div>
+    <div id="messageArea"></div>
+  </section>
+</main>
+
+<script>
+  const WORDS={"lenguaje":[{w:"SILABA",h:"Unidad de sonido en una palabra"},{w:"NARRACION",h:"Relato de hechos imaginarios o reales"},{w:"VERBO",h:"Palabra que indica acción o estado"}],"ingles":[{w:"CAT",h:"Animal doméstico: gato (traducción)"},{w:"HOUSE",h:"Lugar donde vive la familia"},{w:"APPLE",h:"Fruta roja o verde"}],"c.sociales":[{w:"MAPA",h:"Representación gráfica de un territorio"},{w:"HISTORIA",h:"Conjunto de hechos pasados"},{w:"CIUDAD",h:"Lugar con muchas casas y servicios"}],"c.naturales":[{w:"AGUA",h:"Sustancia esencial para la vida"},{w:"PLANTA",h:"Organismo que hace fotosíntesis"},{w:"ANIMAL",h:"Ser vivo que se mueve por sí mismo"}]};
+  const subjectButtons=document.querySelectorAll('.btn');
+  const wordDisplay=document.getElementById('wordDisplay');
+  const lettersWrap=document.getElementById('letters');
+  const hintEl=document.getElementById('wordHint');
+  const messageArea=document.getElementById('messageArea');
+  let currentSubject='lenguaje',secret='',hint='',revealed=[],remaining=6,used=new Set();
+  const parts=['part-head','part-body','part-arm-l','part-arm-r','part-leg-l','part-leg-r'];
+  subjectButtons.forEach(b=>b.addEventListener('click',()=>{subjectButtons.forEach(x=>x.classList.remove('active'));b.classList.add('active');currentSubject=b.dataset.subject;newWord();}));
+  function chooseRandomWord(){const arr=WORDS[currentSubject];return arr[Math.floor(Math.random()*arr.length)];}
+  function newWord(){const picked=chooseRandomWord();secret=picked.w.toUpperCase();hint=picked.h;revealed=Array.from(secret).map(ch=>ch.match(/[A-ZÑ]/)?'_':ch);remaining=6;used.clear();renderWord();createKeyboard();updateHangman(0);hintEl.textContent='Pista: —';messageArea.innerHTML='';}
+  function renderWord(){wordDisplay.textContent=revealed.join(' ');}
+  function createKeyboard(){lettersWrap.innerHTML='';'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').forEach(l=>{const btn=document.createElement('button');btn.className='letter-btn';btn.textContent=l;btn.onclick=()=>onLetter(l,btn);lettersWrap.appendChild(btn);});}
+  function onLetter(l,btn){if(used.has(l))return;used.add(l);btn.disabled=true;let hit=false;for(let i=0;i<secret.length;i++){if(secret[i]===l){revealed[i]=l;hit=true;}}if(!hit){remaining--;updateHangman(6-remaining);}renderWord();checkEnd();}
+  function updateHangman(step){for(let i=0;i<parts.length;i++){document.getElementById(parts[i]).style.opacity=(i<step)?'1':'0';}}
+  function checkEnd(){if(!revealed.includes('_')){showMsg('¡Ganaste!','win');disable();}else if(remaining<=0){showMsg('Perdiste — la palabra era: '+secret,'lose');disable();}}
+  function disable(){document.querySelectorAll('.letter-btn').forEach(b=>b.disabled=true);}
+  function showMsg(t,type){messageArea.innerHTML=`<div class='message ${type}'>${t}</div>`;}
+  document.getElementById('newWordBtn').onclick=()=>newWord();
+  document.getElementById('saveScoreA').onclick=()=>alert('Puntuación guardada (ejemplo).');
+  document.addEventListener('keydown',e=>{const c=e.key.toUpperCase();const b=[...document.querySelectorAll('.letter-btn')].find(x=>x.textContent===c);if(b&&!b.disabled)b.click();});
+  newWord();
+</script>
+</body>
+</html>
